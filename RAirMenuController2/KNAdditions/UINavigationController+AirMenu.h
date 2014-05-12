@@ -1,5 +1,5 @@
 //
-//  RViewController.h
+//  UINavigationController+AirMenu.h
 //  RAirMenuControllerDemo2
 //
 //  Created by Ryan Wang on 14-5-9.
@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "RAirMenuController.h"
 
-@interface RViewController : RAirMenuController
+@interface UINavigationController (AirMenu)
+
 
 @end
