@@ -19,6 +19,7 @@
 @property(nonatomic,assign) NSUInteger selectedIndex;
 
 @property (nonatomic,strong) IBOutlet UIView *topView;
+@property (nonatomic,strong) IBOutlet UIImageView *backgroundView;
 @property (nonatomic, assign) CGFloat menuRowHeight;
 
 - (IBAction)openMenu:(BOOL)animation;

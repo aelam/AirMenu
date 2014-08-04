@@ -9,6 +9,17 @@
 #import "RDemoViewController.h"
 #import "UIViewController+AirMenu.h"
 
+@implementation UIColor (RandomColor)
+
++ (UIColor *)randomColor {
+    float r = 1.0 / 255.0 * (random()% 255);
+    float g = 1.0 / 255.0 * (random()% 255);
+    float b = 1.0 / 255.0 * (random()% 255);
+    return [UIColor colorWithRed:r green:g blue:b alpha:1];
+}
+
+@end
+
 @interface RDemoViewController ()
 
 @end
@@ -27,6 +38,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor randomColor];
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 100, 300, 100)];
     label.textAlignment = NSTextAlignmentCenter;
     label.text = self.title;

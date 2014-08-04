@@ -28,6 +28,8 @@
     CGFloat                     _translationX;
     
     UIViewController            *_oldViewController;
+    
+    CGFloat                     _activeWidth;
 
 }
 
@@ -49,34 +51,36 @@
 - (void)_initialize {
     _menuWidth = 320;
     _menuRowHeight = 50;
+    _activeWidth = 280;
 }
 
 - (void)viewDidLoad {
-    CGFloat _topHeight = 60;
+    CGFloat _topHeight = 44;
+    if([[UIDevice currentDevice].systemVersion floatValue] >= 7.0) {
+        _topHeight = 64;
+    }
     
     self.menuView = [[RAirMenuView alloc] initWithFrame:self.view.bounds];
     self.menuView.delegate = self;
     [self.view addSubview:self.menuView];
     
-    _rightCloseButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [_rightCloseButton setTitle:@"Close" forState:UIControlStateNormal];
+    _rightCloseButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_rightCloseButton addTarget:self action:@selector(closeAction:) forControlEvents:UIControlEventTouchUpInside];
     _rightCloseButton.frame = CGRectMake(self.view.bounds.size.width - 70, 0, 70, self.view.bounds.size.height);
-    _rightCloseButton.layer.borderColor = [UIColor yellowColor].CGColor;
-    _rightCloseButton.layer.borderWidth = 3;
     [self.view addSubview:_rightCloseButton];
     
+
     self.contentView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.view.bounds))];
-    self.contentView.backgroundColor = [UIColor lightGrayColor];
-    self.contentView.layer.borderWidth = 2;
-    self.contentView.layer.borderColor = [UIColor redColor].CGColor;
+    self.contentView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    self.contentView.clipsToBounds = YES;
+    self.contentView.layer.allowsEdgeAntialiasing = YES;
     [self.view addSubview:self.contentView];
     
     self.topView = [[UIView alloc] initWithFrame:CGRectMake(0, -_topHeight, CGRectGetWidth(self.view.bounds), _topHeight)];
+//    self.topView.backgroundColor = [UIColor red1];
     self.topView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    self.topView.backgroundColor = [UIColor darkGrayColor];
-    self.topView.layer.borderWidth = 2;
-    self.topView.layer.borderColor = [UIColor lightGrayColor].CGColor;
     [self.view addSubview:self.topView];
+
     
     
     _panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleRevealGesture:)];
@@ -88,33 +92,34 @@
 
 - (void)viewWillAppear:(BOOL)animated {
 	[super viewWillAppear:animated];
-    
-    if (!self.childViewControllers)
-        [self.selectedViewController viewWillAppear:animated];
+//    [self.selectedViewController viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
-    
-    if (!self.childViewControllers)
-        [self.selectedViewController viewDidAppear:animated];
-    
+//    [self.selectedViewController viewDidAppear:animated];
 	_visible = YES;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
 	[super viewWillDisappear:animated];
-    
-    if (!self.childViewControllers)
-        [self.selectedViewController viewWillDisappear:animated];
+//    [self.selectedViewController viewWillDisappear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
 	[super viewDidDisappear:animated];
-    
-    if (![self respondsToSelector:@selector(addChildViewController:)])
-        [self.selectedViewController viewDidDisappear:animated];
+//    [self.selectedViewController viewDidDisappear:animated];
 	_visible = NO;
+}
+
+- (void)setBackgroundView:(UIImageView *)backgroundView {
+    if(_backgroundView != backgroundView) {
+        [_backgroundView removeFromSuperview];
+        _backgroundView = backgroundView;
+        [self.view addSubview:_backgroundView];
+        [self.view insertSubview:_backgroundView atIndex:0];
+        [self enableEffect:NO];
+    }
 }
 
 - (void)setViewControllers:(NSArray *)viewControllers {
@@ -128,9 +133,9 @@
         
         _viewControllers = viewControllers;
         
-        for(UIViewController *c in _viewControllers) {
-            [self addChildViewController:c];
-        }
+//        for(UIViewController *c in _viewControllers) {
+//            [self addChildViewController:c];
+//        }
         
         [self loadMenuView];
         // default page
@@ -159,24 +164,28 @@
 
 
 - (void)setSelectedIndex:(NSUInteger)selectedIndex {
-    
+    [self setSelectedIndex:selectedIndex animation:NO];
+}
+
+- (void)setSelectedIndex:(NSUInteger)selectedIndex animation:(BOOL)animation {
     if (selectedIndex >= [_viewControllers count]) {
         return;
     }
-
+    
     _selectedIndex = selectedIndex;
     [self.menuView setSelectedItem:[self.menuView.items objectAtIndex:_selectedIndex]];
     
     UIViewController *vc = [self.viewControllers objectAtIndex:_selectedIndex];
 	if (self.selectedViewController == vc) {
 		if ([self.selectedViewController isKindOfClass:[UINavigationController class]]) {
-			[(UINavigationController *)self.selectedViewController popToRootViewControllerAnimated:YES];
+			[(UINavigationController *)self.selectedViewController popToRootViewControllerAnimated:animation];
 		}
 	} else {
 		self.selectedViewController = vc;
 	}
-
+    
     [self closeMenu:YES];
+    
 }
 
 
@@ -184,22 +193,33 @@
 	UIViewController *oldVC = _selectedViewController;
 	if (_selectedViewController != vc) {
 		_selectedViewController = vc;
-        if (!self.childViewControllers && _visible) {
-			[oldVC viewWillDisappear:NO];
-			[_selectedViewController viewWillAppear:NO];
+        
+        if (/*!self.childViewControllers && */_visible) {
+//			[oldVC viewWillDisappear:NO];
+			[vc viewWillAppear:NO];
+            [oldVC removeFromParentViewController];
 		}
 
         for(UIView *v in self.contentView.subviews) {
             [v removeFromSuperview];
         }
+        vc.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        
+        [self addChildViewController:vc];
+        [vc didMoveToParentViewController:self];
+       
         [self.contentView addSubview:vc.view];
-
-        if (!self.childViewControllers && _visible) {
-			[oldVC viewDidDisappear:NO];
-			[_selectedViewController viewDidAppear:NO];
+        vc.view.frame = self.contentView.bounds;
+        
+        if (/*!self.childViewControllers &&*/ _visible) {
+//			[oldVC viewDidDisappear:NO];
+//			[_selectedViewController viewDidAppear:NO];
 		}
 
 		[self.menuView setSelectedItem:[self.menuView.items objectAtIndex:_selectedIndex]];
+        
+        
+        
 	}
 }
 
@@ -212,7 +232,7 @@
 }
 
 - (void)transformForTopView:(CGFloat)distance animation:(BOOL)animation {
-    float percentage = distance / _menuWidth;
+    float percentage = distance / _activeWidth;
     percentage = MAX(percentage, 0);
     percentage = MIN(percentage, 1);
     if(animation) {
@@ -228,7 +248,7 @@
 
 
 - (void)transformForContentView:(CGFloat)distance animation:(BOOL)animation{
-    CGFloat distanceThreshold = 320.f;
+    CGFloat distanceThreshold = _activeWidth;
     CGFloat coverAngle = -55.0 / 180.0 * M_PI;
     CGFloat perspective = -1.0/1150;  // fixed
     
@@ -263,7 +283,7 @@
                              perspective:(CGFloat)perspective {
     CATransform3D transform = CATransform3DIdentity;
     transform.m34 = perspective;
-    transform = CATransform3DTranslate(transform, tranlationX * 280.0 / 320.0 , 0, 0);
+    transform = CATransform3DTranslate(transform, tranlationX , 0, 0);
     transform = CATransform3DScale(transform, scale, scale, 1.0);
     transform = CATransform3DRotate(transform, angle, 0.0, 1.0, 0.0);
     
@@ -274,9 +294,20 @@
 
 - (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)panGestureRecognizer {
     CGPoint translation = [panGestureRecognizer translationInView:self.view];
+    CGPoint velocity = [panGestureRecognizer velocityInView:self.view];
     
     _draggingHorizonal = fabs(translation.y) < fabs(translation.x);
-    //    return fabs(translation.y) > fabs(translation.x);
+    if(_menuOpened && velocity.x > 0) {
+        return NO;
+    }
+    
+    if ([_selectedViewController isKindOfClass:[UINavigationController class]]) {
+        UINavigationController *navigator = (UINavigationController *)_selectedViewController;
+        if (navigator.topViewController != [navigator.viewControllers firstObject]) {
+            return NO;
+        }
+    }
+    
     return YES;
 }
 
@@ -305,14 +336,14 @@
                 break;
         }
     } else {
-        CGPoint point = [recognizer locationInView:self.view];
-        if (CGRectContainsPoint(self.contentView.frame, point)) {
-            NSLog(@"point: %@", NSStringFromCGPoint(point));
-            NSLog(@"rect : %@", NSStringFromCGRect(self.contentView.frame));
-        } else {
-//            [self.menuView handleRevealGesture:recognizer];
-        }
-        //         [self.menuView.frame ]
+//        CGPoint point = [recognizer locationInView:self.view];
+//        if (CGRectContainsPoint(self.contentView.frame, point)) {
+//            NSLog(@"point: %@", NSStringFromCGPoint(point));
+//            NSLog(@"rect : %@", NSStringFromCGRect(self.contentView.frame));
+//        } else {
+//
+//        }
+
     }
 }
 
@@ -352,7 +383,9 @@
     
 }
 
-
+- (void)closeAction:(id)sender {
+    [self closeMenu:YES];
+}
 
 - (void)closeMenu:(BOOL)animation {
     _menuOpened = NO;
@@ -360,20 +393,37 @@
     [self transformForContentView:0 animation:animation];
     [self transformForMenuView:0 animation:animation];
     [self transformForTopView:0 animation:animation];
-    
+
+    self.contentView.userInteractionEnabled = YES;
 }
 
 - (void)openMenu:(BOOL)animation {
-    _translationX = 280;
+    _translationX = _activeWidth;
     _menuOpened = YES;
     [self transformForContentView:_translationX animation:animation];
     [self transformForMenuView:_translationX animation:animation];
     [self transformForTopView:_translationX animation:animation];
+    
+    self.contentView.userInteractionEnabled = NO;
 }
 
 - (void)menuView:(RAirMenuView *)menu didSelectItemAtIndex:(NSInteger)index {
     [self setSelectedIndex:index];
 
+}
+
+
+- (void)enableEffect:(BOOL)effect {
+    if (!effect) {
+        return;
+    }
+    UIInterpolatingMotionEffect *horizontalMotionEffect = [[UIInterpolatingMotionEffect alloc] initWithKeyPath:@"center.x" type:UIInterpolatingMotionEffectTypeTiltAlongHorizontalAxis];
+    horizontalMotionEffect.minimumRelativeValue = @(-20);
+    horizontalMotionEffect.maximumRelativeValue = @(20);
+    
+    if([self.backgroundView respondsToSelector:@selector(addMotionEffect:)]) {
+        [self.backgroundView addMotionEffect:horizontalMotionEffect];
+    }
 }
 
 

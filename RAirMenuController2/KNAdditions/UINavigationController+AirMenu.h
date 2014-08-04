@@ -10,5 +10,8 @@
 
 @interface UINavigationController (AirMenu)
 
+- (NSString *)menuTitle;
+- (UIImage *)menuImage;
+- (UIImage *)selectedMenuImage;
 
 @end

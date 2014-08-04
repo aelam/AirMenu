@@ -84,7 +84,6 @@
 		94CCA02B191C773100C3D89F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		94CCA02D191C773100C3D89F /* RAirMenuControllerDemo2Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RAirMenuControllerDemo2Tests.m; sourceTree = "<group>"; };
 		94CCA03B191C774B00C3D89F /* libRAirMenuController2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRAirMenuController2.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		94CCA03F191C774B00C3D89F /* RAirMenuController2-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RAirMenuController2-Prefix.pch"; sourceTree = "<group>"; };
 		94CCA040191C774B00C3D89F /* RAirMenuController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RAirMenuController.h; sourceTree = "<group>"; };
 		94CCA042191C774B00C3D89F /* RAirMenuController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RAirMenuController.m; sourceTree = "<group>"; };
 		94CCA05D191C873F00C3D89F /* RAirMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RAirMenuView.h; sourceTree = "<group>"; };
@@ -220,7 +219,6 @@
 		94CCA03E191C774B00C3D89F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				94CCA03F191C774B00C3D89F /* RAirMenuController2-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -487,7 +485,7 @@
 			buildSettings = {
 				DSTROOT = /tmp/RAirMenuController2.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "RAirMenuController2/RAirMenuController2-Prefix.pch";
+				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -503,7 +501,7 @@
 			buildSettings = {
 				DSTROOT = /tmp/RAirMenuController2.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "RAirMenuController2/RAirMenuController2-Prefix.pch";
+				GCC_PREFIX_HEADER = "";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

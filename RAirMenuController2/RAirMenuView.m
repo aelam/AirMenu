@@ -27,7 +27,6 @@
 }
 
 - (void)_initialize {
-//    self.menuCells = [NSMutableArray array];
     _menuItemSize = CGSizeMake(240, 50);
     _menuItemGap = 10;
     
@@ -100,10 +99,10 @@
     for(RMenuItem *cell in self.items) {
         angle *= factor;
         CATransform3D tranform = CATransform3DIdentity;
-        tranform.m34 = 1.f / 1400.f;
+        tranform.m34 = 1.f / 900.f;
         tranform =  CATransform3DRotate(tranform ,angle, 0, 1, 0);
         cell.layer.transform = tranform;
-        factor *= 0.8;
+        factor *= 0.9;
         offset -= offsetWidth;
     }
     if (animation) {

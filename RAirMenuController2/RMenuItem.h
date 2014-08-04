@@ -14,5 +14,6 @@
 @property(nonatomic,strong) UILabel *titleLabel;
 @property(nonatomic,copy) NSString *badgeValue;
 @property(nonatomic,strong) UIImageView *imageView;
+@property(nonatomic,strong) UIView *contentView;
 
 @end
